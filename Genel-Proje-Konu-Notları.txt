@@ -1,0 +1,5 @@
+                        Middleware
+
+    - Node.js temelde req, res lerden oluşur yani bir istek göndeririz ve bir yanıt alırız. Buna istek-cevap döngüsü denir. Meslea about
+sayfası için istek gönderdik '/about' bize about sayfasını verdi. Bu req-res döngüsüdür. İşte bu döngünün içerisindeki her şeye Middleware 
+denir. Çünkü her şey request ve response'un Middleında yapılır yani arasında yapılır.
