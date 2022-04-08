@@ -1,30 +1,26 @@
 const express = require('express');
+const ejs = require('ejs');
 const path = require('path');
 
 const app = express();
 
-
-/*
-const myLogger = (req, res, next) => {
-    console.log("Middleware Log 1");
-    next(); // Middleware'lar sırayla çalışır biz burada next yazmazsak bir sonraki middleware'e(app.get) geçmez.
-}
-
-const myLogger2 = (req, res, next) => {
-    console.log("Middleware Log 2");
-    next();
-}
-*/
+//TEMPLATE ENGINE
+app.set("view engine", "ejs");
 
 
 // MIDDLEWARES
 app.use(express.static('public'))
-    // app.use(myLogger);
-    // app.use(myLogger2)
 
 
-app.get('/', (req, res) => { //get requestleri genelde verileri listelemek için kullanırız. Post ise veri göndermek için kullanılır.
-    res.sendFile(path.resolve(__dirname, 'temp/index.html'));
+// ROUTES
+app.get('/', (req, res) => {
+    res.render('index')
+})
+app.get('/about', (req, res) => {
+    res.render('about')
+})
+app.get('/add', (req, res) => {
+    res.render('add')
 })
 
 const port = 3000;
