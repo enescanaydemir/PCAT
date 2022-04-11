@@ -10,9 +10,9 @@ app.set("view engine", "ejs");
 
 // MIDDLEWARES
 app.use(express.static('public'))
-    // Aşağıda yazdığımız middlewareler req,res döngüsünde aldığımız requesti sonlandırmamıza yardımcı oldu.
+    // Aşağıda yazdığımız middlewareler req,res döngüsünde aldığımız requesti sonlandırmamıza yardımcı oldu. Bunları kullanmadığımızda request dönüyordu ancak response alamıyorduk.
 app.use(express.urlencoded({ extended: true })) // urlencoded = url'deki datayı okumamızı sağlıyor
-app.use(express.json()) // url deki
+app.use(express.json()) // url deki datayı JSON formatına döndürmemizi sağlıyor.
 
 
 // ROUTES
