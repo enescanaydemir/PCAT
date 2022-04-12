@@ -27,12 +27,22 @@ app.use(express.json()) // url deki datayı JSON formatına döndürmemizi sağl
 
 
 // ROUTES
-app.get('/', async(req, res) => { //Aşağıda yorum satırında bahsettiğim olayların async şekilde gerçekleşmesi için async ekledim
-    const photos = await Photo.find({}) // Ana sayfada fotoğrafların dinamik olarak gömülmesini istediğimiz için bu satırda fotoğrafları yakalıyoruz(find() -> sıralamya yarar)
-    res.render('index', { // Yukarıda yakaladığımız fotoğrafları template'e gönderiyoruz.
-        photos: photos // burada objenin anahtar kelimesi ve değeri aynı olduğu zaman tek kelime olarak yazarız(photos) ancak burada kafa karışıklığı olmasın diye böyle yazdım 
+app.get('/', async(req, res) => {
+    const photos = await Photo.find({})
+    res.render('index', {
+        photos: photos
     })
 })
+
+app.get('/photos/:id', async(req, res) => {
+    //console.log(req.params.id)
+    //res.render('about')
+    const photo = await Photo.findById(req.params.id)
+    res.render('photo', {
+        photo
+    })
+})
+
 app.get('/about', (req, res) => {
     res.render('about')
 })
@@ -40,9 +50,9 @@ app.get('/add', (req, res) => {
     res.render('add')
 })
 
-app.post('/photos', async(req, res) => { // bir sıkışıklığa ve karışıklığa sebep olmasın diye async yapıya çevirdik
-    await Photo.create(req.body) // Model yardımıyla veritabanında oluşturduğumuz document olana kadar await durumunda olacak
-    res.redirect('/') // console'a yazdıktan sonra ana sayfaya dönmesini söyledik(index e redirect etmek)
+app.post('/photos', async(req, res) => {
+    await Photo.create(req.body)
+    res.redirect('/')
 })
 
 
