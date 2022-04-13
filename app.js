@@ -4,9 +4,9 @@ const fileUpload = require('express-fileupload')
 const methodOverride = require('method-override')
 
 const ejs = require('ejs')
-const fs = require('fs')
 const path = require('path')
-const Photo = require('./models/Photo')
+const photoController = require('./controllers/photoControllers')
+const pageController = require('./controllers/pageController')
 
 const app = express()
 
@@ -21,71 +21,26 @@ app.set('view engine', 'ejs')
 
 // MIDDLEWARES
 app.use(express.static('public'))
-    // Aşağıda yazdığımız middlewareler req,res döngüsünde aldığımız requesti sonlandırmamıza yardımcı oldu. Bunları kullanmadığımızda request dönüyordu ancak response alamıyorduk.
-app.use(express.urlencoded({ extended: true })); // urlencoded = url'deki datayı okumamızı sağlıyor
-app.use(express.json()) // url deki datayı JSON formatına döndürmemizi sağlıyor.
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 app.use(fileUpload())
-app.use(methodOverride('_method'))
+app.use(
+    methodOverride('_method', {
+        methods: ['POST', 'GET'],
+    })
+);
 
 // ROUTES
-app.get('/', async(req, res) => {
-    const photos = await Photo.find({}).sort('-dateCreated')
-    res.render('index', {
-        photos: photos,
-    })
-})
+app.get('/', photoController.getAllPhotos)
+app.get('/photos/:id', photoController.getPhoto)
+app.post('/photos', photoController.creatPhoto)
+app.put('/photos/:id', photoController.updatePhoto)
+app.delete('/photos/:id', photoController.deletePhoto)
+app.get('/about', pageController.getAboutPage)
+app.get('/add', pageController.getAddPage)
+app.get('/photos/edit/:id', pageController.getEditPage)
 
-app.get('/photos/:id', async(req, res) => {
-    const photo = await Photo.findById(req.params.id)
-    res.render('photo', {
-        photo,
-    })
-})
-
-app.get('/about', (req, res) => {
-    res.render('about')
-})
-app.get('/add', (req, res) => {
-    res.render('add')
-})
-
-app.post('/photos', async(req, res) => {
-
-    const uploadDir = 'public/uploads'
-
-    if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir)
-    }
-
-    let uploadeImage = req.files.image; //görselin bilgilerini yakalayarak uploadedImage değişkenine gönderdik
-    let uploadPath = __dirname + '/public/uploads/' + uploadeImage.name; //public klasörünün içerisinde uploads dosyası oluşturduk ve bunun için yukarıda bilgilerini aldığımız görselin ismini ekledik
-
-    uploadeImage.mv(uploadPath, async() => { // Yüklemesini istediğimiz klasörü .mv ile belirtebiliyoruz. Bunun içerisine 1. parametre olarak nereye eklemesi gerektiği dosyayı yazıyoruz. 2. parametre ise görseli istediğimiz dosyaya kaydettikten sonra bize dosya yolunu belirtecek(image: '/uploads/' + uploadeImage.name) 
-        await Photo.create({
-            ...req.body,
-            image: '/uploads/' + uploadeImage.name,
-        })
-        res.redirect('/')
-    })
-})
-
-app.get('/photos/edit/:id', async(req, res) => {
-    const photo = await Photo.findOne({ _id: req.params.id })
-    res.render('edit', {
-        photo
-    })
-})
-
-app.put('/photos/:id', async(req, res) => {
-    const photo = await Photo.findOne({ _id: req.params.id })
-    photo.title = req.body.title
-    photo.description = req.body.description
-    photo.save()
-
-    res.redirect(`/photos/${req.params.id}`)
-})
-
-const port = 3000;
+const port = 3000
 app.listen(port, () => {
     console.log(`Sunucu ${port} portu ile başlatıldı`)
 })
