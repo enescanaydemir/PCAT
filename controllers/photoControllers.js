@@ -2,10 +2,25 @@ const Photo = require('../models/Photo')
 const fs = require('fs')
 
 exports.getAllPhotos = async(req, res) => {
-    const photos = await Photo.find({}).sort('-dateCreated')
+
+    const page = req.query.page || 1
+    const photosPerPage = 2 //sayfada bulunan fotoğraf sayısı
+
+    //Datada bulunan döküman sayılarını(dataya eklenen verilerin sayısını) bulma işlemi;
+    const totalPhotos = await Photo.find().countDocuments() //tüm fotoğrafları(documents) bulup onları sayıyor; (yani ana sayfada kaç tane fotoğraf eklediysek o kadar sayacak)
+
+    //Her bir sayfada gösterilecek fotoğrafları yakalayacağız;
+    const photos = await Photo.find({}) //ikili await yapısı kullandık.
+        .sort('-dateCreated')
+        .skip((page - 1) * photosPerPage) //Her sayfada 2 fotoğraf gösteriyoruz. Sayfa sıralarken 1. sayfada 1. ve 2. fotoğrafı gösterip, 2. sayfada 3. ve 4. fotoğrafı gösterebilmesi için ilk sayfada gösterdiği 1. ve 2. fotoğrafı atlaması lazım. Bunu skip fonksiyonu ile yapıyoruz. ".skip((page(sayfa sırası)-1) * photosPerPage(sayfadaki fotoğraf sayısı))" soldaki işlem; .skip((2-1) * 2) 1 ve 2 yi pas geç diyoruz. 
+        .limit(photosPerPage) //her sayfada kaç tane gösterilmesini istiyorsak .limit fonksiyonu ile içine parametre olarak göndererek belirliyoruz.
     res.render('index', {
         photos: photos,
+        current: page, //current = o anda bulunan sayfaya karşılık geliyor
+        pages: Math.ceil(totalPhotos / photosPerPage) // pages = toplam sayfa sayımız. Bunu bulabilmek için "totalPhotos / photosPerPage" işlemini yapıyoruz yani total fotoğraf sayısını sayfadaki fotoğraf sayısına bölüyoruz. yani 5 fotoğrafımız var ve her sayfada 2 tane var 5/2 den 2.5 onu da Math.ceil ile 3 e yuvarlıyoruz. 
     })
+
+
 }
 
 exports.getPhoto = async(req, res) => {
